@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { HttpException, HttpStatus, Injectable, NotFoundException } from '@nestjs/common';
 import { CreateTaskDto } from './dto/create-task.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
@@ -19,13 +19,24 @@ export class TaskService {
   ) {}
 
   async create(createTaskDto: CreateTaskDto,userId : number) {
-    let task : Task = new Task();
-    task.title = createTaskDto.title;
-    task.description = createTaskDto.description;
-    task.user = await this.userService.findUserById(userId);
-    
-    return this.tasksRepository.save(task);
+    try {
+      const existingUser = await this.userService.findUserById(userId);
+      let task: Task = new Task();
+      
+      if (!existingUser) {
+          throw new HttpException('No user exists for this id', HttpStatus.NOT_FOUND);
+      }
+      
+      task.title = createTaskDto.title;
+      task.description = createTaskDto.description;
+      task.user = existingUser;
+      
+      return await this.tasksRepository.save(task);
+  } catch (error) {
+      throw new HttpException('Failed to create task: ' + error.message, HttpStatus.BAD_REQUEST);
   }
+}
+  
 
   async getAllTasks(userId : number) {
     const tasks =  await this.tasksRepository.find({

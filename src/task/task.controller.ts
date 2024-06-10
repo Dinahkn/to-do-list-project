@@ -7,14 +7,12 @@ export class TaskController {
   constructor(private readonly taskService: TaskService) {}
 
   @Post(":userId")
-  create(@Body(ValidationPipe) createTaskDto: CreateTaskDto, @Param("userId") userId : number) {
-    try{
-      return this.taskService.create(createTaskDto,Number(userId));
-    }
-    catch(error){
-      throw new HttpException(error.message, HttpStatus.BAD_REQUEST);
-    }
-    
+  async create(@Body(ValidationPipe) createTaskDto: CreateTaskDto, @Param("userId") userId: number) {
+      try {
+          return await this.taskService.create(createTaskDto, Number(userId));
+      } catch (error) {
+          throw new HttpException({ message: error.message }, HttpStatus.BAD_REQUEST);
+      }
   }
 
 
@@ -37,7 +35,7 @@ export class TaskController {
     }
   }
 
-  @Patch(':id')
+  @Patch("/updateTask/:id")
   update(@Param('id') id: number) {
     try{
       return this.taskService.update(Number(id));
@@ -49,7 +47,7 @@ export class TaskController {
 
   }
 
-  @Delete(':id')
+  @Delete("/deleteTask/:id")
   remove(@Param('id') id: string) {
     try{
       return this.taskService.remove(Number(id));

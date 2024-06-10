@@ -3,6 +3,11 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { CreateUserInfoDto } from './dto/create-user-info.dto';
 import { UserInfo } from './entities/user-info.entity';
+import { Constants } from 'src/utils/constants';
+
+// create new user
+// find all user - admin
+// delete user - admin
 
 @Injectable()
 export class UserInfoService {
@@ -22,7 +27,7 @@ export class UserInfoService {
     user.firstname = createUserInfoDto.firstname;
     user.lastname = createUserInfoDto.lastname;
     user.password = createUserInfoDto.password;
-    user.role = 'NORMAL_USER';
+    user.role = Constants.ROLES.NORMAL_USER;
     return await this.usersRepository.save(user);
   }
 
@@ -33,11 +38,16 @@ export class UserInfoService {
 
   @Get()
   findUserByEmail(email: string) {
-    return this.usersRepository.findOneOrFail({where : {email : email}});
+    return this.usersRepository.findOne({where : {email : email}});
   }
 
-  findUserById(id : number){
-    return this.usersRepository.findOneOrFail({where : {id : id}});
+  async findUserById(id : number){
+    try {
+      const user = await this.usersRepository.findOne({ where: { id: id } });
+      return user;
+  } catch (error) {
+      throw new Error("User not found with the provided ID");
+  }
   }
 
 
