@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, ValidationPipe } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, ValidationPipe, HttpStatus, HttpException } from '@nestjs/common';
 import { TaskService } from './task.service';
 import { CreateTaskDto } from './dto/create-task.dto';
 
@@ -8,28 +8,55 @@ export class TaskController {
 
   @Post(":userId")
   create(@Body(ValidationPipe) createTaskDto: CreateTaskDto, @Param("userId") userId : number) {
-    return this.taskService.create(createTaskDto,Number(userId));
+    try{
+      return this.taskService.create(createTaskDto,Number(userId));
+    }
+    catch(error){
+      throw new HttpException(error.message, HttpStatus.BAD_REQUEST);
+    }
+    
   }
 
 
   @Get("/getAll/:userId")
-  getAllTasks(@Param("userId") userId : number) {
-    return this.taskService.getAllTasks(Number(userId));
+  async getAllTasks(@Param("userId") userId : number) {
+    try{
+      return await this.taskService.getAllTasks(Number(userId));
+    }catch(error){
+      throw new HttpException(error.message, HttpStatus.BAD_REQUEST);
+    }
+    
   }
 
   @Get("/getTask/:taskId")
-  getTaskById(@Param("taskId") taskId : number){
-    return this.taskService.getTaskById(Number(taskId));
-
+  async getTaskById(@Param("taskId") taskId : number){
+    try {
+      return await this.taskService.getTaskById(Number(taskId));
+    } catch (error) {
+      throw new HttpException({ message: error.message }, HttpStatus.BAD_REQUEST);
+    }
   }
 
   @Patch(':id')
   update(@Param('id') id: number) {
-    return this.taskService.update(Number(id));
+    try{
+      return this.taskService.update(Number(id));
+    }
+    catch(error){
+      throw new HttpException(error.message, HttpStatus.BAD_REQUEST);
+    }
+    
+
   }
 
   @Delete(':id')
   remove(@Param('id') id: string) {
-    return this.taskService.remove(Number(id));
+    try{
+      return this.taskService.remove(Number(id));
+    }    
+    catch(error){
+      throw new HttpException(error.message, HttpStatus.BAD_REQUEST);
+    }
+    
   }
 }
