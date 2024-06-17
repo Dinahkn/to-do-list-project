@@ -43,18 +43,11 @@ export class TaskService {
       relations : ["user"],
       where : {user : {id : userId}},
     });
-    if (!tasks || tasks.length === 0) {
-      throw new Error('No tasks found for the given user');
-    }
-
     return tasks;
   }
 
   getTaskById(id: number): Promise<Task> {
     return this.tasksRepository.findOne({ where: { id: id } }).then(task => {
-      if (!task) {
-        throw new Error('Task not found');
-      }
       return task;
     });
   }

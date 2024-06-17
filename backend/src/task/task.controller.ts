@@ -18,10 +18,19 @@ export class TaskController {
 
   @Get("/getAll/:userId")
   async getAllTasks(@Param("userId") userId : number) {
-    try{
-      return await this.taskService.getAllTasks(Number(userId));
-    }catch(error){
-      throw new HttpException(error.message, HttpStatus.BAD_REQUEST);
+    try {
+      const tasks = await this.taskService.getAllTasks(Number(userId));
+      if (!tasks || tasks.length === 0) {
+        console.log('i am inthe if');
+        throw new HttpException('No tasks found for the given user', HttpStatus.NO_CONTENT);;// Renvoyer un message sans contenu avec le code 204 No Content
+      }
+      return tasks;
+    } catch (notFoundError) {
+      if (notFoundError instanceof HttpException && notFoundError.getStatus() === HttpStatus.NO_CONTENT) {
+        throw notFoundError; // Renvoyer l'exception 204 No Content sans la modifier
+      } else {
+        throw new HttpException('Internal server error', HttpStatus.INTERNAL_SERVER_ERROR);
+      }
     }
     
   }
